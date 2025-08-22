@@ -1,0 +1,64 @@
+﻿<UserControl 
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Air_Folder"
+             xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="Air_Folder.MyStacksControl"
+             Height="Auto" Width="Auto">
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Для заголовка и кнопки -->
+            <RowDefinition Height="*"/>
+            <!-- Для списка стеков -->
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Для кнопки (автоширина) -->
+                <ColumnDefinition Width="*"/>
+                <!-- Для текста (остальное пространство) -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Кнопка создания нового стека с иконкой (теперь в колонке 0) -->
+            <Button x:Name="CreateStackButton" Width="32" Height="32" 
+                    Click="CreateStack_Click" 
+                    ToolTip="Создать стек"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Margin="0,0,10,10" Grid.Column="0"
+                    Background="{x:Null}" BorderBrush="{x:Null}">
+                <!-- Отступ справа от кнопки -->
+                <Image Source="/Assets/add_stack.ico" />
+            </Button>
+
+            <TextBlock Text="Мои стеки:" FontSize="16" FontWeight="Bold" 
+                       VerticalAlignment="Center" Margin="0,0,0,10" Grid.Column="1"/>
+        </Grid>
+
+        <ListBox Grid.Row="1" x:Name="StacksListBox" ItemsSource="{Binding}" 
+                 ScrollViewer.CanContentScroll="True" ScrollViewer.VerticalScrollBarVisibility="Auto" av:ItemsSource="{av:SampleData ItemCount=5}">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:StackConfiguration}">
+                    <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="5" Margin="0,0,0,5" Width="525">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Image Grid.Column="0" Source="{Binding IconSource}" Width="48" Height="48" Margin="0,0,10,0"
+                                   Cursor="Hand" MouseDown="StackIcon_MouseDown" ToolTip="Редактировать стек"/>
+
+                            <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Top" FontWeight="SemiBold" Margin="0,0,32,0"/>
+
+                            <Button Grid.Column="2" Width="32" Height="32" Click="DeleteStack_Click" ToolTip="Удалить стек" Tag="{Binding}" VerticalAlignment="Top" BorderBrush="{x:Null}" HorizontalAlignment="Right" Background="{x:Null}">
+                                <Image Source="/Assets/remove_stack.ico" />
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

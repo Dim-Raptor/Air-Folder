@@ -1,0 +1,6 @@
+﻿<UserControl x:Class="Air_Folder.GeneralSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="Auto" Width="Auto">
+    <TextBlock Text="Здесь будут общие настройки" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16"/>
+</UserControl>
