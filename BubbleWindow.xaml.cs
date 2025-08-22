@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media; // *** ВАЖНО: Добавьте этот using для ScaleTransform ***
 using System.Windows.Media.Animation;
@@ -20,13 +18,12 @@ namespace Air_Folder
         private double _initialPosX; // X-координата крестика (точки открытия)
         private double _initialPosY; // Y-координата крестика (точки открытия)
         private string _openingDirection;
-        private StackConfiguration _stackConfig;
 
         private double _finalWidth;
         private double _finalHeight;
         private bool _isClosingAnimationRunning = false;
 
-        public BubbleWindow(string folderPath, double posX, double posY, string openingDirection, StackConfiguration stackConfig)
+        public BubbleWindow(string folderPath, double posX, double posY, string openingDirection)
         {
             InitializeComponent();
 
@@ -37,18 +34,6 @@ namespace Air_Folder
 
             // Начальные состояния окна перед анимацией
             this.Opacity = 0;   // Начинаем полностью прозрачным
-            _stackConfig = stackConfig; // Новый параметр
-            DataContext = _stackConfig;
-            FileItemsControl.MouseLeftButtonUp += FileItemsControl_MouseLeftButtonUp;
-
-
-            _stackConfig.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(_stackConfig.IsListModeEnabled))
-                    UpdateViewMode();
-            };
-
-            UpdateViewMode(); // Инициализация режима
 
             LoadItems(); // Загружаем содержимое папки
 
@@ -59,71 +44,35 @@ namespace Air_Folder
             MouseLeave += BubbleWindow_MouseLeave; // Событие ухода мыши
         }
 
-
-        private void FileItemsControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-{
-    // Получаем элемент под курсором
-    var element = e.OriginalSource as FrameworkElement;
-    if (element?.DataContext is FileItem fileItem)
-    {
-        try
+        private void LoadItems()
         {
-            Process.Start(new ProcessStartInfo(fileItem.Path) { UseShellExecute = true });
-            CloseAndActivateMainWindow();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show("Ошибка открытия файла: " + ex.Message);
-        }
-    }
-}
-
-
-        private void UpdateViewMode()
-        {
-            if (_stackConfig == null) return;
-
-            FileItemsControl.ItemsPanel =
-                (ItemsPanelTemplate)FindResource(
-                    _stackConfig.IsListModeEnabled
-                    ? "ListViewTemplate"
-                    : "IconViewTemplate"
-                );
-        }
-
-
-
-        private async void LoadItems()
-        {
-            try
+            if (Directory.Exists(_folderPath))
             {
-                if (Directory.Exists(_folderPath))
+                var files = Directory.GetFiles(_folderPath).Where(file => !File.GetAttributes(file).HasFlag(FileAttributes.Hidden));
+                foreach (var file in files)
                 {
-                    // Получаем список файлов (без скрытых)
-                    var files = Directory.GetFiles(_folderPath)
-                        .Where(file => !File.GetAttributes(file).HasFlag(FileAttributes.Hidden))
-                        .ToList();
-
-                    // Создаём список объектов с данными о файлах
-                    var fileItems = new List<FileItem>();
-                    foreach (var file in files)
+                    var txt = new System.Windows.Controls.TextBlock
                     {
-                        fileItems.Add(new FileItem
-                {
-                    Name = Path.GetFileNameWithoutExtension(file),
-                    Path = file
-                });
-                    }
+                        Text = Path.GetFileNameWithoutExtension(file),
+                        Margin = new Thickness(5),
+                        Cursor = Cursors.Hand
+                    };
 
-                    // Привязываем список к ItemsControl
-                    FileItemsControl.ItemsSource = fileItems;
+                    txt.MouseLeftButtonUp += (s, e) =>
+                    {
+                        try
+                        {
+                            Process.Start(new ProcessStartInfo(file) { UseShellExecute = true });
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Ошибка открытия файла: " + ex.Message);
+                        }
+                        CloseAndActivateMainWindow();
+                    };
+
+                    ItemsPanel.Children.Add(txt);
                 }
-            }
-            catch (Exception ex)
-            {
-                // Обработка ошибок
-                FileItemsControl.ItemsSource = null;
-                MessageBox.Show("Ошибка загрузки файлов: " + ex.Message);
             }
         }
 
